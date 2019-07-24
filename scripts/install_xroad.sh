@@ -45,8 +45,8 @@ xroad_password=$xroadPassword
 # internal_ip=$internalIpAddress
 # [IG-CS] 1.8       central server public IP address, NAT address
 public_ip=$publicIpAddress
-# [IG-CS] 1.9       <by default, the server’s IP addresses and names are added to the certificate’s Distinguished Name (DN) field>
-# [IG-CS] 1.10      <by default, the server’s IP addresses and names are added to the certificate’s Distinguished Name (DN) field>
+# [IG-CS] 1.9       by default, the server's IP addresses and names are added to the certificate�s Distinguished Name (DN) field
+# [IG-CS] 1.10      by default, the server's IP addresses and names are added to the certificate�s Distinguished Name (DN) field
 
 
 
@@ -89,5 +89,3 @@ echo $public_ip
 # sudo apt-get install xroad-centralserver
 # TODO: Automate configuration
 # Add user to roles
-
-
