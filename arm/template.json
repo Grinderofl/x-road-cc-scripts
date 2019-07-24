@@ -177,7 +177,8 @@
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "xroadUsername" : "[parameters('xroadUsername')]",
-                    "xroadPassword" : "[parameters('xroadPassword')]"
+                    "xroadPassword" : "[parameters('xroadPassword')]",
+                    "publicIpAddress" : "[concat(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('virtualMachineName'))).osProfile.adminUsername,'@',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress)]"
                 }
             },
             "tags": {}
@@ -213,6 +214,10 @@
         "xroadUsername" : {
             "type": "string",
             "value": "[parameters('xroadUsername')]"
-        }
+        },
+        "Public IP SSH": {
+            "value": "[concat(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('virtualMachineName'))).osProfile.adminUsername,'@',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress)]",
+            "type": "string"
+         }
     }
 }
