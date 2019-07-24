@@ -36,7 +36,7 @@ xroad_password=$xroadPassword
 #                   TCP 4002 management services
 # [IG-CS] 1.5       Port for outbound connections (from the central server to the external network)
 #                   TCP 80 software updates
-# [IG-CS] 1.6       Internal network ports, the user interface port, and management service ports for the management services' security server
+# [IG-CS] 1.6       Internal network ports, the user interface port, and management service ports for the management services security server
 #                   TCP 80 HTTP between the central server and the management services' security server
 #                   TCP 4000 user interface
 #                   TCP 4001 HTTPS between the central server and the management services' security server
@@ -45,8 +45,8 @@ xroad_password=$xroadPassword
 # internal_ip=$internalIpAddress
 # [IG-CS] 1.8       central server public IP address, NAT address
 public_ip=$publicIpAddress
-# [IG-CS] 1.9       by default, the server's IP addresses and names are added to the certificate's Distinguished Name (DN) field
-# [IG-CS] 1.10      by default, the server's IP addresses and names are added to the certificate's Distinguished Name (DN) field
+# [IG-CS] 1.9       by default the servers IP addresses and names are added to the certificates Distinguished Name (DN) field
+# [IG-CS] 1.10      by default the servers IP addresses and names are added to the certificates Distinguished Name (DN) field
 
 
 
