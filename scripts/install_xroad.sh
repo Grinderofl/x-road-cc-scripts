@@ -45,10 +45,6 @@ xroad_password=$xroadPassword
 # internal_ip=$internalIpAddress
 # [IG-CS] 1.8       central server public IP address, NAT address
 public_ip=$publicIpAddress
-# [IG-CS] 1.9       by default the servers IP addresses and names are added to the certificates Distinguished Name (DN) field
-# [IG-CS] 1.10      by default the servers IP addresses and names are added to the certificates Distinguished Name (DN) field
-
-
 
 # ============================================================
 # 2.4 Preparing OS
