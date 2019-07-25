@@ -200,7 +200,7 @@
                     ]
                 },
                 "protectedSettings" : {
-                    "commandToExecute": "[concat('sh install_ansible.sh && bash -c \"install_xroad.sh ', parameters('xroadUsername'),' ',parameters('xroadPassword'),' ', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress, '\"')]"
+                    "commandToExecute": "[concat('sh install_ansible.sh && bash -c \"./install_xroad.sh ', parameters('xroadUsername'),' ',parameters('xroadPassword'),' ', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress, '\"')]"
                 }
             }
         }
