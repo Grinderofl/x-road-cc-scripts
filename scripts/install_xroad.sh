@@ -9,19 +9,31 @@ echo "Validating script parameters and environment variables ..."
 # 
 xroad_repo='https://artifactory.niis.org/xroad-release-deb'
 xroad_repo_key='https://artifactory.niis.org/api/gpg/key/public'
-xroad_username=$0
-xroad_password=$1
+xroad_username=$1
+xroad_password=$2
 # internal_ip=$internalIpAddress
-public_ip=$2
+public_ip=$3
 
 # ============================================================
 # 2.4 Preparing OS
 
 # Create user groups
 echo "Creating user groups ..."
-sudo groupadd xroad-registration-officer
-sudo groupadd xroad-system-administrator
-sudo groupadd xroad-security-officer
+egrep -i "^xroad-registration-officer" /etc/group;
+if [$? -eq 0]; then
+else
+    sudo groupadd xroad-registration-officer
+fi
+egrep -i "^xroad-system-administrator" /etc/group;
+if [$? -eq 0]; then
+else
+    sudo groupadd xroad-system-administrator
+fi
+egrep -i "^xroad-security-officer" /etc/group;
+if [$? -eq 0]; then
+else
+    sudo groupadd xroad-security-officer
+fi
 
 # * Add a system user (reference data: 1.3) whom all roles in the user interface are granted to.
 echo "Creating xroad user '$xroad_username' and adding to groups ..."
