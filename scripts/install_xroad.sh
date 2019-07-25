@@ -3,17 +3,16 @@
 echo "Beginning Installation of X-Road Central Server ..."
 # Exit script on error
 set -euxo pipefail
-source .bash_profile
 echo "Validating script parameters and environment variables ..."
 # ---
 # VARIABLES
 # 
 xroad_repo='https://artifactory.niis.org/xroad-release-deb'
 xroad_repo_key='https://artifactory.niis.org/api/gpg/key/public'
-xroad_username=$xroadUsername
-xroad_password=$xroadPassword
+xroad_username=$0
+xroad_password=$1
 # internal_ip=$internalIpAddress
-public_ip=$publicIpAddress
+public_ip=$2
 
 # ============================================================
 # 2.4 Preparing OS
