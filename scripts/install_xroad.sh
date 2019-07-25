@@ -3,7 +3,7 @@
 echo "Beginning Installation of X-Road Central Server ..."
 # Exit script on error
 set -euxo pipefail
-
+source .bash_profile
 echo "Validating script parameters and environment variables ..."
 # ---
 # VARIABLES
