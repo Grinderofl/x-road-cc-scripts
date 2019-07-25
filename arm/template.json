@@ -46,13 +46,7 @@
         "publicIpAddressName": "ansible-ip",
         "publicIpAddressType": "Dynamic",
         "publicIpAddressSku": "Basic",
-        "osDiskType": "Premium_LRS",
-        "arguments": {
-            "adminUsername": "parameters('adminUsername')')",
-            "adminPassword": "parameters('adminPassword')",
-            "xroadUsername": "parameters('xroadUsername')",
-            "xroadPassword": "parameters('xroadPassword`)"
-        }
+        "osDiskType": "Premium_LRS"
     },
     "resources": [
         {
@@ -187,40 +181,34 @@
             }
         },
         {
+            "name": "[concat(parameters('virtualMachineName'),'/CustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2015-06-15",
-            "name": "[concat(parameters('virtualMachineName'),'/CustomScriptForLinux')]",
             "location": "[parameters('location')]",
+            "apiVersion": "2015-06-15",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
             ],
             "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
-                "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.4",
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
                         "https://raw.githubusercontent.com/Microsoft/azuredevopslabs/master/labs/vstsextend/ansible/armtemplate/install_ansible.sh",
                         "https://raw.githubusercontent.com/Grinderofl/x-road-cc-scripts/master/scripts/install_xroad.sh"
-                    ],
-                    "commandToExecute": "[concat('sh install_ansible.sh && bash -c \"export xroadUsername=',parameters('xroadUsername'), '\" && bash -c \"export xroadPassword=',parameters('xroadPassword'), '\" && bash -c \"export publicIpAddress=',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress,'\" && sh install_xroad.sh')]"                    
+                    ]
+                },
+                "protectedSettings" : {
+                    "commandToExecute": "[concat('sh install_ansible.sh && bash -c \"echo \\''xroadUsername=',parameters('xroadUsername'),'\nxroadPassword=',parameters('xroadPassword'),'\npublicIpAddress=',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress,'\n\\'' >> ~./profile\" && source ~./profile && bash -c \"\" && bash install_xroad.sh')]"
                 }
             }
         }
     ],
     "outputs": {
         "adminUsername": {
-            "type": "String",
+            "type": "string",
             "value": "[parameters('adminUsername')]"
-        },
-        "xroadUsername": {
-            "type": "String",
-            "value": "[parameters('xroadUsername')]"
-        },
-        "Public IP SSH": {
-            "type": "String",
-            "value": "[concat(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('virtualMachineName'))).osProfile.adminUsername,'@',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress)]"
         }
     }
 }

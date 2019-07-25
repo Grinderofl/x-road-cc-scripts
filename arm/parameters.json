@@ -15,13 +15,13 @@
         "value": "grinderofl"
       },
       "adminPassword": {
-        "value": "JC3cOL35vy760s0i"
+        "value": null
       },
       "xroadUsername" : {
           "value": "xroaduser"
       },
       "xroadPassword" : {
-          "value": "79CpCjhW12VKR3hE"
+          "value": null
       }
     }
   }
