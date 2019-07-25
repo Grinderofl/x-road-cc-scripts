@@ -9,10 +9,10 @@ echo "Validating script parameters and environment variables ..."
 # 
 xroad_repo='https://artifactory.niis.org/xroad-release-deb'
 xroad_repo_key='https://artifactory.niis.org/api/gpg/key/public'
-xroad_username=$0
-xroad_password=$1
+xroad_username=$1
+xroad_password=$2
 # internal_ip=$internalIpAddress
-public_ip=$2
+public_ip=$3
 
 # ============================================================
 # 2.4 Preparing OS
