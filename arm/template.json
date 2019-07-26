@@ -27,12 +27,6 @@
         },
         "adminPassword": {
             "type": "SecureString"
-        },
-        "xroadUsername": {
-            "type": "String"
-        },
-        "xroadPassword": {
-            "type": "SecureString"
         }
     },
     "variables": {
