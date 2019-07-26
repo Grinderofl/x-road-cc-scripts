@@ -40,6 +40,7 @@
         "publicIpAddressName": "ansible-ip",
         "publicIpAddressType": "Dynamic",
         "publicIpAddressSku": "Basic",
+        "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
         "osDiskType": "Premium_LRS"
     },
     "resources": [
@@ -283,7 +284,7 @@
         },
         "publicIpAddress" : {
             "type": "string",
-            "value": "[concat('Microsoft.Network.publicIpAddresses/', variables('publicIpAddressName')).IpAddress]"
+            "value": "[reference(variables('publicIPRef')).ipAddress]"
         }
     }
 }
