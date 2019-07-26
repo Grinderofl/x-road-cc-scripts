@@ -100,7 +100,86 @@
                             "destinationAddressPrefix": "*",
                             "destinationPortRange": "22"
                         }
+                    },
+                    {
+                        "name": "AuthCertRegistration",
+                        "properties": {
+                            "priority": 301,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "4001"
+                        }
+                    },
+                    {
+                        "name": "SoftwareUpdates",
+                        "properties": {
+                            "priority": 302,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "80"
+                        }
+                    },
+                    {
+                        "name": "InternalNetworkPort",
+                        "properties": {
+                            "priority": 303,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "80"
+                        }
+                    },
+                    {
+                        "name": "InternalUIPort",
+                        "properties": {
+                            "priority": 304,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "4000"
+                        }
+                    },
+                    {
+                        "name": "InternalMgmgServicePortHttps",
+                        "properties": {
+                            "priority": 305,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "4001"
+                        }
+                    },
+                    {
+                        "name": "InternalMgmgServicePortHttp",
+                        "properties": {
+                            "priority": 305,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "4400"
+                        }
                     }
+
                 ]
             }
         },
@@ -186,7 +265,8 @@
             "location": "[parameters('location')]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]",
+                "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
             ],
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -195,13 +275,10 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/Microsoft/azuredevopslabs/master/labs/vstsextend/ansible/armtemplate/install_ansible.sh",
-                        "https://raw.githubusercontent.com/Grinderofl/x-road-cc-scripts/master/scripts/install_xroad.sh"
+                        "https://raw.githubusercontent.com/Microsoft/azuredevopslabs/master/labs/vstsextend/ansible/armtemplate/install_ansible.sh"
                     ]
                 },
-                "protectedSettings" : {
-                    "commandToExecute": "[concat('sh install_ansible.sh && bash -c \"./install_xroad.sh ', parameters('xroadUsername'),' ',parameters('xroadPassword'),' ', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).IpAddress, '\"')]"
-                }
+                "protectedSettings" : {"commandToExecute": "sh install_ansible.sh"}
             }
         }
     ],
@@ -209,6 +286,10 @@
         "adminUsername": {
             "type": "string",
             "value": "[parameters('adminUsername')]"
+        },
+        "publicIpAddress" : {
+            "type": "string",
+            "value": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName')).IpAddress]"
         }
     }
 }
