@@ -1,0 +1,494 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "IncomingTcp443" : {
+            "defaultValue": "443",
+            "type": "string"            
+        },
+        "IncomingTcp80" : {
+            "defaultValue": "80",
+            "type": "string"
+        },
+        "IncomingTcp5000" : {
+            "defaultValue": "5000",
+            "type": "string",
+            "metadata": {
+                "description" : "Port for inbound connections (from the external network to the security server) Message exchange between security servers"
+            }
+        },
+        "IncomingTcp5577" : {
+            "defaultValue": "5577",
+            "type": "string",
+            "metadata": {
+                "description" : "Port for inbound connections (from the external network to the security server) Querying of OCSP responses between security servers"
+            }
+        },
+        "IncomingTcp9011" : {
+            "defaultValue": "9011",
+            "type": "string",
+            "metadata": {
+                "description" : "Port for inbound connections (from the external network to the security server) Operational data monitoring daemon JMX listening port"
+            }
+        },
+        "IncomingTcp9999" : {
+            "defaultValue": "9999",
+            "type": "string",
+            "metadata": {
+                "description" : "Port for inbound connections (from the external network to the security server) Environmental monitoring daemon JMX listening port"
+            }
+        },
+        "OutboundTcp5000" : {
+            "defaultValue": "5000",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the external network) Message exchange between security servers"
+            }
+        },
+        "OutboundTcp5577" : {
+            "defaultValue": "5577",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the external network) Querying of OCSP responses between security servers"
+            }
+        },
+        "OutboundTcp4001" : {
+            "defaultValue": "4001",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the external network) Communication with the central server"
+            }
+        },
+        "OutboundTcp2080" : {
+            "defaultValue": "2080",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the internal network) Message exchange between security server and operational data monitoring daemon (by default on localhost)"
+            }
+        },
+        "OutboundTcp80" : {
+            "defaultValue": "80",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the external network) Downloading global configuration"
+            }
+        },
+        "OutboundTcp443" : {
+            "defaultValue": "443",
+            "type": "string",
+            "metadata": {
+                "description" : "Ports for outbound connections (from the security server to the external network) Most common OCSP and time-stamping services"
+            }
+        },
+        "OutboundTcp4000" : {
+            "defaultValue": "4000",
+            "type": "string",
+            "metadata": {
+                "description" : "User interface (local network)"
+            }
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "virtualMachineName": {
+            "type": "String"
+        },
+        "virtualMachineSize": {
+            "defaultValue": "Standard_D2w_v3",
+            "allowedValues": [
+                "Standard_B1ms",
+                "Standard_B1s",
+                "Standard_B2s",
+                "Standard_DS1_v2",
+                "Standard_D2w_v2"
+            ],
+            "type": "String"
+        },
+        "adminUsername": {
+            "type": "String"
+        },
+        "adminPassword": {
+            "type": "SecureString"
+        }
+    },
+    "variables": {
+        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+        "networkInterfaceName": "ansibleVMnic",
+        "networkSecurityGroupName": "ansible-nsg",
+        "subnetName": "default",
+        "virtualNetworkName": "ansible-vnet",
+        "publicIpAddressName": "ansible-ip",
+        "publicIpAddressType": "Static",
+        "publicIpAddressSku": "Basic",
+        "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+        "osDiskType": "Premium_LRS"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+            ],
+            "tags": {},
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Static",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-08-01",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "InboundHTTPS",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp443')]"
+                        }
+                    },
+                    {
+                        "name": "InboundHTTP",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp80')]"
+                        }
+                    },
+                    {
+                        "name": "InboundMessageExchange",
+                        "properties": {
+                            "priority": 301,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp5000')]"
+                        }
+                    },
+                    {
+                        "name": "IncboundFromExternal",
+                        "properties": {
+                            "priority": 302,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp5577')]"
+                        }
+                    },
+                    {
+                        "name": "InboundConnections",
+                        "properties": {
+                            "priority": 303,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp9011')]"
+                        }
+                    },
+                    {
+                        "name": "InboundMonitoring",
+                        "properties": {
+                            "priority": 303,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp9999')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundMessageExchange",
+                        "properties": {
+                            "priority": 304,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp5000')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundOCSPQuery",
+                        "properties": {
+                            "priority": 305,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp5577')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundCentralServer",
+                        "properties": {
+                            "priority": 306,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp4001')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundOperationalMonitoring",
+                        "properties": {
+                            "priority": 307,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp2080')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundGlobalConfiguration",
+                        "properties": {
+                            "priority": 308,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp80')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundHTTP",
+                        "properties": {
+                            "priority": 309,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp80')]"
+                        }
+                    },
+                    {
+                        "name": "OutboundHTTPS",
+                        "properties": {
+                            "priority": 310,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Outbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp443')]"
+                        }
+                    },
+                    {
+                        "name": "UserInterface",
+                        "properties": {
+                            "priority": 311,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('OutboundTcp4000')]"
+                        }
+                    },
+                    {
+                        "name": "InboundHTTP",
+                        "properties": {
+                            "priority": 312,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp80')]"
+                        }
+                    },
+                    {
+                        "name": "InboundHTTPS",
+                        "properties": {
+                            "priority": 313,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[parameters('IncomingTcp443')]"
+                        }
+                    }
+                    
+
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2018-08-01",
+            "name": "[variables('publicIpAddressName')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "sku": {
+                "name": "[variables('publicIpAddressSku')]"
+            },
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "name": "[parameters('virtualMachineName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+            ],
+            "tags": {},
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('virtualMachineName'),'/CustomScript')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[parameters('location')]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/Microsoft/azuredevopslabs/master/labs/vstsextend/ansible/armtemplate/install_ansible.sh"
+                    ]
+                },
+                "protectedSettings" : {"commandToExecute": "sh install_ansible.sh"}
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        },
+        "publicIpAddress" : {
+            "type": "string",
+            "value": "[reference(variables('publicIPRef')).ipAddress]"
+        }
+    }
+}

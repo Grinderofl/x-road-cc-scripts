@@ -399,12 +399,29 @@ X-Road uses predefined user groups for its primary servers. This guide prepares 
 >
 > ```bash
 > admin@x-road-cs:~$ sudo adduser --system xroad-system-user
+> Adding system user `xroad-system-user' (UID 111) ...
+> Adding new user `xroad-system-user' (UID 111) with group `nogroup' ...
+> Creating home directory `/home/xroad-system-user' ...
+> 
 > admin@x-road-cs:~$ sudo adduser xroad-system-user xroad-registration-officer
+> Adding user `xroad-system-user' to group `xroad-registration-officer' ...
+> Adding user xroad-system-user to group xroad-registration-officer
+> Done.
+> 
 > admin@x-road-cs:~$ sudo adduser xroad-system-user xroad-system-administrator
+> Adding user `xroad-system-user' to group `xroad-system-administrator' ...
+> Adding user xroad-system-user to group xroad-system-administrator
+> Done.
+> 
 > admin@x-road-cs:~$ sudo adduser xroad-system-user xroad-security-officer
+> Adding user `xroad-system-user' to group `xroad-security-officer' ...
+> Adding user xroad-system-user to group xroad-security-officer
+> Done.
+> 
 > admin@x-road-cs:~$ sudo passwd xroad-system-user
 > admin@x-road-cs:~$ Enter new UNIX password: {xroad-system-user-password}
 > admin@x-road-cs:~$ Retype new UNIX password: {xroad-system-user-password}
+> passwd: password updated successfully
 > ```
 
 
@@ -416,6 +433,9 @@ X-Road uses predefined user groups for its primary servers. This guide prepares 
 > ```bash
 > admin@x-road-cs:~$ sudo bash -c 'echo "LC_ALL=en_US.UTF-8" >> /etc/environment'
 > admin@x-road-cs:~$ sudo locale-gen en_US.UTF-8
+> Generating locales (this might take a while)...
+>   en_US.UTF-8... done
+> Generation complete.
 > ```
 
 
@@ -513,5 +533,71 @@ Press  `Y` to proceed with installation. The script will ask for the system supe
 
 ![Configuring the System User](readme.assets/1564391981096.png)
 
-The script will proceed with installing 
+The script will proceed with the installation, and will then ask for details for the certificate.
+
+![1564402351422](readme.assets/1564402351422.png)
+
+> ### Example
+>
+> ```
+> /C=GB/O=Storm id/OU=R&D/CN=x-road-cs.uksouth.cloudapp.azure.com
+> ```
+
+The script will also ask for subject name alternatives
+
+![1564403148849](readme.assets/1564403148849.png)
+
+It also asks for a name for securing internal connections
+
+![1564403261466](readme.assets/1564403261466.png)
+
+> ### Example
+>
+> ```
+> /C=GB/O=Storm id/OU=R&D/CN=x-road-cs.uksouth.cloudapp.azure.com
+> ```
+
+And as previous, prompts for subject name alternatives.
+
+The script will then proceed to create a postgresql database and apply necessary migrations.
+
+## 8) Install support for hardware tokens
+
+```shell
+admin@x-road-cs:~$ sudo apt-get install xroad-addon-hwtokens
+admin@x-road-cs:~$ sudo service xroad-signer restart
+```
+
+## 9) Perform post-installation checks
+
+```shell
+admin@x-road-cs:~$ sudo systemctl list-units "xroad*"
+```
+
+## 10) Test that the central server administration interface can be opened
+
+A temporary inbound port may be needed to be added in the Azure Network Security Group
+
+```
+https://central-server-address:4000
+```
+
+## 11) Configure the Central Server
+
+Log in using the credentials created earlier
+
+* Username: `xroad-system-user`
+* Password: `<your admin password here>`
+
+The central server will prompt for initial configuration:
+
+![1564406033456](readme.assets/1564406033456.png)
+
+* Instance Identifier: `xroad-primary-server`
+* Central Server Address: `51.105.44.103`
+* Software Token PIN: `5313`
+
+A notice will be displayed that central server is initialized
+
+![1564406139660](readme.assets/1564406139660.png)
 

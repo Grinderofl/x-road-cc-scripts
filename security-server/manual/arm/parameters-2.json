@@ -1,0 +1,106 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "uksouth"
+        },
+        "networkInterfaceName": {
+            "value": "x-road-ss776"
+        },
+        "networkSecurityGroupName": {
+            "value": "x-road-ss-nsg"
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "default-allow-ssh",
+                    "properties": {
+                        "priority": 1000,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceApplicationSecurityGroups": [],
+                        "destinationApplicationSecurityGroups": [],
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22"
+                    }
+                }
+            ]
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "virtualNetworkId": {
+            "value": "/subscriptions/eabb3ced-b3e7-43cb-b92c-9adbafdc895c/resourceGroups/x-road-rnd/providers/Microsoft.Network/virtualNetworks/ansible-vnet"
+        },
+        "publicIpAddressName": {
+            "value": "x-road-ss-ip"
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        },
+        "publicIpAddressSku": {
+            "value": "Basic"
+        },
+        "virtualMachineName": {
+            "value": "x-road-ss"
+        },
+        "virtualMachineRG": {
+            "value": "x-road-rnd"
+        },
+        "osDiskType": {
+            "value": "Premium_LRS"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_D2s_v3"
+        },
+        "adminUsername": {
+            "value": "grinderofl"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "xroadrnddiag"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "/subscriptions/eabb3ced-b3e7-43cb-b92c-9adbafdc895c/resourceGroups/x-road-rnd/providers/Microsoft.Storage/storageAccounts/xroadrnddiag"
+        },
+        "autoShutdownStatus": {
+            "value": "Enabled"
+        },
+        "autoShutdownTime": {
+            "value": "19:00"
+        },
+        "autoShutdownTimeZone": {
+            "value": "UTC"
+        },
+        "autoShutdownNotificationStatus": {
+            "value": "Disabled"
+        },
+        "autoShutdownNotificationLocale": {
+            "value": "en"
+        },
+        "backupVaultName": {
+            "value": "vault642"
+        },
+        "backupFabricName": {
+            "value": "Azure"
+        },
+        "backupVaultRGName": {
+            "value": "x-road-rnd"
+        },
+        "backupVaultRGIsNew": {
+            "value": false
+        },
+        "backupPolicyName": {
+            "value": "DefaultPolicy"
+        },
+        "backupItemName": {
+            "value": "vm;iaasvmcontainerv2;x-road-rnd;x-road-ss"
+        }
+    }
+}

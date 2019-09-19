@@ -6,22 +6,16 @@
         "value": "[resourceGroup().location]"
       },
       "virtualMachineName": {
-        "value": "x-road-cc"
+        "value": "x-road-ss"
       },
       "virtualMachineSize": {
-        "value": "Standard_B1s"
+        "value": "Standard_D2w_v3"
       },
       "adminUsername": {
         "value": "grinderofl"
       },
       "adminPassword": {
         "value": "JC3cOL35vy760s0i"
-      },
-      "xroadUsername" : {
-          "value": "xroaduser"
-      },
-      "xroadPassword" : {
-          "value": "79CpCjhW12VKR3hE"
       }
     }
   }
